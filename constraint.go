@@ -48,7 +48,7 @@ func (cs Constraints) Match(v *Version) bool {
 	for _, c := range cs {
 		r := c.f(c.v, v)
 
-		if (c.r) {
+		if c.r {
 			r = !r
 		}
 

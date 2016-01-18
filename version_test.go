@@ -19,12 +19,12 @@ package semver
 import "testing"
 
 type TestVersionStub struct {
-	Test string
+	Test     string
 	Expected *Version
 }
 
 func TestNewVersion(t *testing.T) {
-	tests := []*TestVersionStub {
+	tests := []*TestVersionStub{
 		&TestVersionStub{"v1.2.3", &Version{"v1.2.3", 1, 2, 3, 0, 3, 0, 0, false, false, ""}},
 		&TestVersionStub{"v1.2.3.4", &Version{"v1.2.3.4", 1, 2, 3, 4, 4, 0, 0, false, false, ""}},
 		&TestVersionStub{"v1.2.3.4-alpha1", &Version{"v1.2.3.4", 1, 2, 3, 4, 4, 1, 1, false, false, ""}},
