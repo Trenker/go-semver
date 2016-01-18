@@ -18,7 +18,6 @@ package semver
 
 import (
 	"errors"
-	"fmt"
 )
 
 type comparator func(v, c *Version) bool
@@ -66,7 +65,6 @@ func (c Constraints) MatchString(version string) bool {
 	v, err := NewVersion(version)
 
 	if err != nil {
-		fmt.Printf("Got version (%s) error %s\n", version, err)
 		return false
 	}
 
