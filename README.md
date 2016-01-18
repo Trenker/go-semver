@@ -6,9 +6,13 @@ This package contains types and functions to parse and check semver version numb
 
 There are only two access points in this package `NewVersion` and `NewConstraint`
 
+### Version
+
 `NewVersion` will return a Version type. The given string must be a valid semver version number. This means: 2 -  4 version digits and an optional suffix, which may be -alpha, -beta, -rc, -patch or -stable, optionally followed by a positiv number.
  
 A string that starts with `dev-` is considered a *rolling* version, as in a rolling release without explicit release versions. In this case, only equal comparisons can succeed.
+
+### Constraint
 
 `NewConstraint` takes a string which has one or more versions, optionally prepended by a comparator. The comparator itself can be prepended with an exclamation mark to negate the result of the comparison.
 
@@ -24,7 +28,7 @@ Comparator | Explanation
 `<`        | Version must be less than given
 `<=`       | Version must be equal or less than given
 
-A full constraint can contain multiple version constraints, connected by comma (`,`) or pipe (`|`). If the comma is used, the result and the result of the previous version must be true, when using the pipe, an or comparison is done.
+A full constraint can contain multiple version constraints, connected by comma (`,`) or pipe (`|`). If the comma is used, the result and the result of the previous version must be true, when using the pipe, an *or* comparison is done.
 
 eg: 
 
@@ -55,7 +59,7 @@ c.Match(v2) // true
 
 ## Credits
 
-This code is highly inspired by the package [go-version](https://github.com/hashicorp/go-version), but not a fork of it.
+This code is highly inspired by the package [go-version](https://github.com/hashicorp/go-version), but is not a fork of it.
 
 ## License
 
