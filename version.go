@@ -25,6 +25,7 @@ var suffix map[string]int = map[string]int{
 	"pl":     3,
 	"p":      3,
 	"rc":     4,
+	"":       5,
 	"stable": 5,
 }
 
