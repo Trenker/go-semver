@@ -61,14 +61,14 @@ func (cs Constraints) Match(v *Version) bool {
 	return res
 }
 
-func (c Constraints) MatchString(version string) bool {
+func (cs Constraints) MatchString(version string) bool {
 	v, err := NewVersion(version)
 
 	if err != nil {
 		return false
 	}
 
-	return c.Match(v)
+	return cs.Match(v)
 }
 
 func sameOrNewerInSameMajor(v, c *Version) bool {
