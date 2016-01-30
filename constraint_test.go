@@ -42,6 +42,18 @@ func TestNewConstraint(t *testing.T) {
 		&TestConstraintStub{"1.2.3", "^1.0.12", true},
 		&TestConstraintStub{"1.2.3", "^1.0.12,>1.3", false},
 		&TestConstraintStub{"1.2.3", "<2.0|>3.3", true},
+		&TestConstraintStub{"1.2.3", "1.2.*", true},
+		&TestConstraintStub{"1.2.3", "*", true},
+		&TestConstraintStub{"1.2.3", "1.*", true},
+		&TestConstraintStub{"1.2.3", "1.3.*", false},
+		&TestConstraintStub{"1.2.3", "1.2.x", true},
+		&TestConstraintStub{"1.2.3", "1.x", true},
+		&TestConstraintStub{"1.2.3", "1.3.x", false},
+		&TestConstraintStub{"dev-master", "dev-master", true},
+		&TestConstraintStub{"dev-master", "!dev-master", false},
+		&TestConstraintStub{"dev-master", "!dev-develop", true},
+		&TestConstraintStub{"dev-master", "dev-develop", false},
+		&TestConstraintStub{"dev-master", "dev-develop|dev-master", true},
 	}
 
 	for _, s := range d {
@@ -51,10 +63,16 @@ func TestNewConstraint(t *testing.T) {
 			t.Errorf("Cannot parse constraint %s: %s, %s -> %s\n", s.Constraint, err, s.Version, s.Constraint)
 		}
 
-		actual := c.MatchString(s.Version)
+		v, err := NewVersion(s.Version)
+
+		if err != nil {
+			t.Errorf("Cannot parse version %s: %s\n", s.Version, err)
+		}
+
+		actual := c.Match(v)
 
 		if actual != s.Expected {
-			t.Errorf("Expected %v, but got %v when checking %s is in %s\n", s.Expected, actual, s.Version, s.Constraint)
+			t.Errorf("Expected %v, but got %v when checking if %s is in %s\n", s.Expected, actual, s.Version, s.Constraint)
 		}
 	}
 }

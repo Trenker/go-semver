@@ -16,6 +16,8 @@ package semver
 // limitations under the License.
 //
 
+import "errors"
+
 var suffix map[string]int = map[string]int{
 	"a":      1,
 	"alpha":  1,
@@ -46,4 +48,44 @@ type Version struct {
 // Function String implements the Stringer interface
 func (v *Version) String() string {
 	return v.src
+}
+
+func parseVersion(s string, p []string) (*Version, error) {
+	v := &Version{
+		src:   s,
+		major: str2int(p[1]),
+		n:     1,
+	}
+
+	if p[2] != "" {
+		v.minor = str2int(p[2][1:])
+		v.n++
+	}
+
+	if p[3] != "" {
+		v.bugfix = str2int(p[3][1:])
+		v.n++
+	}
+
+	if p[4] != "" {
+		v.sub = str2int(p[4][1:])
+		v.n++
+	}
+
+	if p[5] != "" {
+		if _, ok := suffix[p[5]]; !ok {
+			return nil, errors.New("Unknown version suffix " + p[5])
+		}
+		v.suffixTyp = suffix[p[5]]
+	}
+
+	if p[6] != "" {
+		v.suffixInc = str2int(p[6])
+	}
+
+	if p[7] != "" {
+		v.dev = true
+	}
+
+	return v, nil
 }

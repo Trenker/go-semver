@@ -24,75 +24,65 @@ import (
 	"strings"
 )
 
-var versionParts *regexp.Regexp = regexp.MustCompile(
-	`(?i)^v?(\d{1,5})(\.\d+)?(\.\d+)?(\.\d+)?` +
-		`[._-]?(?:(stable|beta|b|rc|alpha|a|patch|pl|p)((?:[.-]*)\d+)?)?` +
-		`([.-]?dev)?$`)
+// vParts is a regex to determine all parts of a version string
+var vParts *regexp.Regexp = regexp.MustCompile(`(?i)` +
+	`^v?(\-?\d{1,5})(\.\-?\d+)?(\.\-?\d+)?(\.\-?\d+)?` +
+	`[._-]?(?:(stable|beta|b|rc|alpha|a|patch|pl|p)((?:[.-]*)\d+)?)?` +
+	`([.-]?dev)?$`)
 
-var constParts *regexp.Regexp = regexp.MustCompile(`(?P<or>[,\|]+)(?P<rev>\!)?(?P<con>[\^~<>=]+)(?P<ver>[v\.\-a-z0-9]+)`)
+// branch is a regex to determine if a version number is a branch reference, like used in rolling / development versions
+var branch = *regexp.MustCompile(`(?i)^\!?dev\-`)
 
+// wildcard is a regex to check for the wildcard characters * and x
+var wildcard *regexp.Regexp = regexp.MustCompile(`[x\*]+`)
+
+// cParts is a regex to determine the parts of a constraint
+// and split multiple constraints
+var cParts *regexp.Regexp = regexp.MustCompile(`(?i)(?P<or>[,\|]+)(?P<rev>\!)?(?P<con>[\^~<>=]+)?(?P<ver>[\.\-0-9\*a-z]+)`)
+
+// space is a regex to determine white-space characters
 var space *regexp.Regexp = regexp.MustCompile(`\s+`)
 
+// NewVersion constructs a new version type based on the given string
+// The argument s must be semver version string, possibly containing a wildcard character, as used in constraints
+// or "floating" versions
 func NewVersion(s string) (*Version, error) {
-	if len(s) > 4 && s[0:4] == "dev-" {
+	if len(s) > 4 && branch.MatchString(s) {
+		b := branch.ReplaceAllString(s, "")
+		b = space.ReplaceAllString(b, "")
+		b = strings.ToLower(b)
+
 		v := &Version{
 			src:     s,
 			rolling: true,
-			branch:  space.ReplaceAllString(strings.ToLower(s[4:]), ``),
+			branch:  b,
 		}
 		return v, nil
 	}
 
-	res := versionParts.FindAllStringSubmatch(space.ReplaceAllString(s, ``), -1)
+	o := s
+	s = wildcard.ReplaceAllString(s, "-1")
+	res := vParts.FindAllStringSubmatch(space.ReplaceAllString(s, ``), -1)
 
 	if len(res) == 1 {
 		matches := res[0]
 
 		if len(matches) > 0 && matches[1] != "" {
-			v := &Version{
-				src:   s,
-				major: str2int(matches[1]),
-				n:     1,
-			}
-
-			if matches[2] != "" {
-				v.minor = str2int(matches[2][1:])
-				v.n++
-			}
-
-			if matches[3] != "" {
-				v.bugfix = str2int(matches[3][1:])
-				v.n++
-			}
-
-			if matches[4] != "" {
-				v.sub = str2int(matches[4][1:])
-				v.n++
-			}
-
-			if matches[5] != "" {
-				if _, ok := suffix[matches[5]]; !ok {
-					return nil, errors.New("Unknown version suffix " + matches[5])
-				}
-				v.suffixTyp = suffix[matches[5]]
-			}
-
-			if matches[6] != "" {
-				v.suffixInc = str2int(matches[6])
-			}
-
-			if matches[7] != "" {
-				v.dev = true
-			}
-
-			return v, nil
+			return parseVersion(s, matches)
 		}
 	}
-	return nil, errors.New("Cannot parse version " + s)
+	return nil, errors.New("Malformed version " + o)
 }
 
+// NewConstraint returns a Constraints type which is a list of Constraint values
+// The argument s is a string value containing one or more valid constraints
 func NewConstraint(s string) (Constraints, error) {
-	pt := constParts.FindAllStringSubmatch(`,`+strings.ToLower(space.ReplaceAllString(s, ``)), -1)
+	pt := cParts.FindAllStringSubmatch(`,`+strings.ToLower(space.ReplaceAllString(s, ``)), -1)
+
+	if len(pt) < 1 {
+		return nil, errors.New("Cannot find constraints in " + s)
+	}
+
 	cs := make([]*Constraint, len(pt))
 
 	for i, s := range pt {
@@ -108,7 +98,14 @@ func NewConstraint(s string) (Constraints, error) {
 	return Constraints(cs), nil
 }
 
+// str2int is a convinience wrapper around strconv.Atoi that will always return an int
+// and silently discard possible errors
 func str2int(s string) int {
-	i, _ := strconv.Atoi(s)
+	i, err := strconv.Atoi(s)
+
+	if err != nil {
+		return 0
+	}
+
 	return i
 }

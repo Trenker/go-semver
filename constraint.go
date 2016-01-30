@@ -45,18 +45,32 @@ type Constraints []*Constraint
 
 func (cs Constraints) Match(v *Version) bool {
 	res := true
+
+	if v.rolling {
+		for _, c := range cs {
+			r := c.v.rolling && c.v.branch == v.branch
+			res = normalizeResult(c, r, res)
+		}
+
+		return res
+	}
+
 	for _, c := range cs {
-		r := c.f(c.v, v)
+		res = normalizeResult(c, c.f(c.v, v), res)
 
-		if c.r {
-			r = !r
-		}
+	}
+	return res
+}
 
-		if c.o {
-			res = res || r
-		} else {
-			res = res && r
-		}
+func normalizeResult(c *Constraint, r, res bool) bool {
+	if c.r {
+		r = !r
+	}
+
+	if c.o {
+		res = res || r
+	} else {
+		res = res && r
 	}
 	return res
 }
@@ -91,6 +105,18 @@ func sameWithNewerLast(v, c *Version) bool {
 }
 
 func same(v, c *Version) bool {
+	if v.src != c.src {
+		if v.major == c.major {
+			if v.minor == c.minor {
+				if v.bugfix == c.bugfix {
+					return v.sub == c.sub || v.sub == -1
+				}
+				return v.bugfix == -1
+			}
+			return v.minor == -1
+		}
+		return v.major == -1
+	}
 	return v.src == c.src
 }
 
