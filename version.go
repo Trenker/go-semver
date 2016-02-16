@@ -16,7 +16,10 @@ package semver
 // limitations under the License.
 //
 
-import "errors"
+import (
+	"errors"
+	"strings"
+)
 
 var suffix map[string]int = map[string]int{
 	"a":      1,
@@ -73,10 +76,12 @@ func parseVersion(s string, p []string) (*Version, error) {
 	}
 
 	if p[5] != "" {
-		if _, ok := suffix[p[5]]; !ok {
+		suf := strings.ToLower(p[5])
+
+		if _, ok := suffix[suf]; !ok {
 			return nil, errors.New("Unknown version suffix " + p[5])
 		}
-		v.suffixTyp = suffix[p[5]]
+		v.suffixTyp = suffix[suf]
 	}
 
 	if p[6] != "" {

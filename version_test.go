@@ -28,6 +28,7 @@ func TestNewVersion(t *testing.T) {
 		&TestVersionStub{"v1.2.3", &Version{"v1.2.3", 1, 2, 3, 0, 3, 0, 0, false, false, ""}},
 		&TestVersionStub{"v1.2.3.4", &Version{"v1.2.3.4", 1, 2, 3, 4, 4, 0, 0, false, false, ""}},
 		&TestVersionStub{"v1.2.3.4-alpha1", &Version{"v1.2.3.4", 1, 2, 3, 4, 4, 1, 1, false, false, ""}},
+		&TestVersionStub{"v1.2.3.4_RC2", &Version{"v1.2.3.4", 1, 2, 3, 4, 4, 4, 2, false, false, ""}},
 	}
 
 	for _, testVersion := range tests {
