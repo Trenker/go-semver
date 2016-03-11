@@ -25,6 +25,11 @@ type TestConstraintStub struct {
 
 func TestNewConstraint(t *testing.T) {
 	d := []*TestConstraintStub{
+		&TestConstraintStub{"1.2.3", "~2.7|~3.0 ", false},
+		&TestConstraintStub{"1.9.3", "~2.7|~3.0 ", false},
+		&TestConstraintStub{"2.7.3", "~2.7|~3.0 ", true},
+		&TestConstraintStub{"2.9.3", "~2.7|~3.0 ", true},
+		&TestConstraintStub{"3.3.3", "~2.7|~3.0 ", true},
 		&TestConstraintStub{"1.2.3", "~1.2.0", true},
 		&TestConstraintStub{"1.2.3", "^1.2.0", true},
 		&TestConstraintStub{"1.2.3", "^1.1.0", true},
