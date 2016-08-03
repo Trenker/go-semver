@@ -35,25 +35,27 @@ eg:
 * `>= 1.2 , < 2.0` matches `1.2.3` but not `1.0.0`
 * `>= 1.2 | < 2.0` matches `1.2.3` and `1.0.0`
 
-A constraint has to functions: `Match` and `MatchString`. The first will check if the version given matches the constraint. `MatchString` will do this with the version string, but will return *false*, not an error, if the version cannot be parsed:
+A constraint has two functions: `Match` and `MatchString`. The first will check if the version given matches the constraint. `MatchString` will do this with the version string, but will return *false*, not an error, if the version cannot be parsed.
+
+### Example
 
 ```go
 package main
 
-import "github.com/trenker/go-semver"
+import "github.com/garfieldius/go-semver"
 
 v1 := semver.NewVersion("1.2.3")
 v2 := semver.NewVersion("2.4.6")
 
-c := semver.NewConstraint(">= 1.2.0, < 2.0")
+c1 := semver.NewConstraint(">= 1.2.0, < 2.0")
 
-c.Match(v1) // true
-c.Match(v2) // false
+c1.Match(v1) // true
+c1.Match(v2) // false
 
-c = semver.NewConstraint("^2.0.0 | 1.9.4-beta6")
+c2 := semver.NewConstraint("^2.0.0 | 1.9.4-beta6")
 
-c.Match(v1) // false
-c.Match(v2) // true
+c2.Match(v1) // false
+c2.Match(v2) // true
 ```
 
 ## Credits
